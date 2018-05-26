@@ -11,15 +11,11 @@ class SellerController {
     const { zipFileHash, metaFileHash } = req.body
     if (!zipFileHash || !metaFileHash) return res.status(400).end()
     const urlSlug = randomstring.generate()
-    console.log(zipFileHash)
-    console.log(metaFileHash)
-    console.log(urlSlug)
     req.db.collection('sales').insertOne({
       zipFileHash,
       metaFileHash,
       urlSlug
     }, doc => {
-      console.log(doc)
       res.send(urlSlug)
     })
   }

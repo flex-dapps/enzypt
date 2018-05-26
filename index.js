@@ -1,9 +1,12 @@
+require('dotenv').config()
 const cors = require('cors')
+const mongodbSanitise = require('express-mongo-sanitize')
 const app = require('express')()
 const routes = require('./controllers')
 
 const expressMongoDb = require('express-mongo-db')
-app.use(expressMongoDb('mongodb://localhost/filevapour'))
+app.use(expressMongoDb(process.env.MONGODB_URL))
+app.use(mongodbSanitise())
 app.use(cors())
 
 routes.bind(app)
