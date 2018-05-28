@@ -1,7 +1,0 @@
-.npmignore
-.gitignore
-docs/
-example/
-build/
-test/
-node_modules/
