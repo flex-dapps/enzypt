@@ -11,7 +11,7 @@ Should hit this when we have encrypted and uploaded both the zip file and the me
 Params
 ```
 {
-    zipFileHash: String, // IPFS hash of the Zip file
+    zipFileHash: String, // IPFS hash of the zip file
     metaFileHash: String // IPFS hash of the meta file
 }
 ```

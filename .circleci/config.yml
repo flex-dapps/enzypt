@@ -36,3 +36,22 @@ jobs:
         
       # run tests!
       - run: yarn test
+  deploy-prod:
+    docker:
+      - image: circleci/node:8.11
+  steps:
+    - checkout
+    - run: ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP "./deploy_project.sh"
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy-prod:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - build
