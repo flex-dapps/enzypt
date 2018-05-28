@@ -35,13 +35,14 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
         
       # run tests!
-      - run: yarn test
+#      - run: yarn test
+
   deploy-prod:
     docker:
       - image: circleci/node:8.11
-  steps:
-    - checkout
-    - run: ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP "./deploy_project.sh"
+    steps:
+      - checkout
+      - run: ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP "./deploy_project.sh"
 
 workflows:
   version: 2
