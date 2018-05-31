@@ -1,16 +1,6 @@
-require('dotenv').config()
-const cors = require('cors')
-const mongodbSanitise = require('express-mongo-sanitize')
-const app = require('express')()
-const routes = require('./controllers')
+/**
+  * Start enzypt.io server
+  */
 
-const expressMongoDb = require('express-mongo-db')
-app.use(expressMongoDb(process.env.MONGODB_URL))
-app.use(mongodbSanitise())
-app.use(cors())
-
-routes.bind(app)
-
-app.listen(3000, () => {
-  console.log('Listening on 3000')
-})
+require('./server.js')
+connectAndStart(process.env.MONGODB_URL)

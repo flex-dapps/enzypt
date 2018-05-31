@@ -26,6 +26,7 @@ class BuyerController {
           _id: 0
         }
       )
+      if (!doc) return res.status(404).send()
       res.send(doc)
     } catch (e) {
       return res.status(404).send()

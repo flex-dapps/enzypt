@@ -8,7 +8,6 @@ class SellerController {
 
   static postSell(req, res, next) {
     const { zipFileHash, metaFileHash, iv, ethPrice } = req.body
-    console.log(req.body)
     if (!zipFileHash || !metaFileHash || !iv) return res.status(400).end()
     const urlSlug = randomstring.generate()
     req.db.collection('sales').insertOne(
@@ -21,7 +20,7 @@ class SellerController {
         urlSlug
       },
       doc => {
-        res.send(urlSlug)
+        res.status(201).send({ 'slug': urlSlug})
       }
     )
   }

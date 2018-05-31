@@ -1,0 +1,14 @@
+
+> @ test /home/sebastian/flexdapps/projs/enzypt/backend
+> mocha --exit
+
+
+
+  API endpoint /sell
+Listening on 3000
+{ slug: 'rejDeWAZbL7DFynAMSMhuGA9A7TjGTG5' }
+    ✓ should add a file to db (60ms)
+
+
+  1 passing (104ms)
+
