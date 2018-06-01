@@ -20,7 +20,7 @@ class SellerController {
         urlSlug
       },
       doc => {
-        res.status(201).send({ 'slug': urlSlug})
+        res.status(201).send(urlSlug)
       }
     )
   }
