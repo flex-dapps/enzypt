@@ -4,6 +4,7 @@ const MongoClient = require('mongodb').MongoClient
 const chai = require('chai');
 const expect = require('chai').expect;
 var assert = require('assert');
+const web3 = require('../services/web3')
 
 chai.use(require('chai-http'));
 
@@ -92,14 +93,13 @@ describe('API endpoint /buy', function() {
       .then(async (res) => {
         // Request file and compare
         return chai.request(app)
-          .get('/' + res.slug)
+          .get('/' + res.body.slug)
           .then(function(res) {
             expect(res).to.have.status(200);
             expect(res).to.be.json;
-            expect(res.zipFileHash).to.equal(zipFileHash)
-            expect(res.metaFileHash).to.equal(metaFileHash)
-            expect(res.iv).to.equal(iv)
-            expect(res.ethPrice).to.equal(ethPrice)
+            expect(res.body.metaFileHash).to.equal(metaFileHash)
+            expect(res.body.iv).to.equal(iv)
+            expect(res.body).to.have.property('downloads')
           });
     });
   });
@@ -115,81 +115,105 @@ describe('API endpoint /buy', function() {
       });
   });
   
-  /*
-
-  // GET - Invalid path/urlslug
-  it('should return 404', function() {
-    return chai.request(app)
-      .get('/INVALID_PATH')
-      .then(function(res) {
-        console.log(res)
-        throw new Error('Path exists!');
-      })
-      .catch(function(err) {
-        expect(err).to.have.status(404);
-      });
-  });
-
-  // GET - Invalid file
-  it('should say that this file is not for sale', function() {
-    return chai.request(app)
-      .get('/buy')
-      .then(function(res) {
-        throw new Error('File exists!');
-      })
-      .catch(function(err) {
-        expect(err).to.have.status(404);
-      });
-  });
-
   // POST - Request for a random key
   it('should return a random string', function() {
     return chai.request(app)
       .post('/rand')
       .send({
-        publicKey: '...'
+        publicKey: '0xBBB8C3f8997F9c0598Bd9DB897374879122E1d62'
       })
       .then(function(res) {
-        expect(res).to.have.status(201);
-        expect(res).to.be.json;
-        expect(res.body).to.be.an('object');
-        expect(res.body.results).to.be.an('array').that.includes(
-          'randomString');
+        expect(res).to.have.status(200);
+        expect(res).to.be.html;
+        expect(res).to.have.property('text')
+        expect(res.text).to.have.length(16)
       });
   });
 
-  // POST - Posting a signed message to verify address ownership
-  it('should add new color', function() {
+
+  // POST - Request for a random key
+  it('should return a 400', function() {
     return chai.request(app)
       .post('/rand')
       .send({
-        publicKey: '...'
+        publicKey: 'feckoff'
       })
       .then(function(res) {
-        expect(res).to.have.status(201);
-        expect(res).to.be.json;
-        expect(res.body).to.be.an('object');
-        expect(res.body.results).to.be.an('array').that.includes(
-          'randomString');
+        expect(res).to.have.status(400);
       });
   });
 
-  // POST - Bad Request
-  it('should return Bad Request', function() {
+  /*
+  // POST - Posting a signed message to verify address ownership
+  it('should validate the signed message and public key', function() {
     return chai.request(app)
-      .post('/colors')
-      .type('form')
+      .post('/msg')
       .send({
-        color: 'YELLOW'
+        publicKey: '0xbbb8c3f8997f9c0598bd9db897374879122e1d62',
+        signedMessage: 'signedMessage',
+        urlSlug: 'rrrandom'
       })
       .then(function(res) {
-        throw new Error('Invalid content type!');
+        expect(res).to.have.status(200);
+        expect(res).to.be.html;
+        expect(res).to.have.property('text')
+        expect(res.text).to.have.length(32)
+      });
+  });
+  
+  // POST - Bad message
+  it('An unknown signed message should return 418', function() {
+    return chai.request(app)
+      .post('/msg')
+      .send({
+        publicKey: '123456',
+        urlSlug: 'abcdef',
+        signedMessage: 'somethinggood'
       })
-      .catch(function(err) {
-        expect(err).to.have.status(400);
+      .then(function(res) {
+        console.log(res.body)
+        expect(res).to.have.status(418);
+      });
+  });
+
+  // POST - Bad transaction
+  it('A bad transaction should return 400', function() {
+    return chai.request(app)
+      .post('/buy')
+      .send({
+        txHash: '0xdeadbeef'
+      })
+      .then(function(res) {
+        expect(res).to.have.status(400);
       });
   });
 
   */
+
+  // POST - Missing message
+  it('A missing signed message should return 400', function() {
+    return chai.request(app)
+      .post('/msg')
+      .send({
+        publicKey: '123456',
+        urlSlug: 'abcdef'
+      })
+      .then(function(res) {
+        expect(res).to.have.status(400);
+      });
+  });
+
+  // POST - Bad transaction
+  it('A wrong transaction should return 418', function() {
+    return chai.request(app)
+      .post('/buy')
+      .send({
+        txHash: '0x552ee8b23b0306c11562886debb11122261f2030e23f7c553b2403fc1b68ed2c'
+      })
+      .then(function(res) {
+        expect(res).to.have.status(418);
+      });
+  });
+
 });
 
