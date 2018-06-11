@@ -57,11 +57,16 @@ class BuyerController {
 
   static async postMsg(req, res, next) {
     const { publicKey, signedMessage, urlSlug } = req.body
-    if (!publicKey || !signedMessage) return res.status(400).send()
+    if (!publicKey || !signedMessage || !urlSlug) return res.status(400).send()
     const lowerCasePublicKey = publicKey.toLowerCase()
     const doc = await req.db
       .collection('auth')
       .findOne({ publicKey: lowerCasePublicKey })
+
+    if(!doc) {
+      return res.status(404).send()
+    }
+
     const messageToRecover = config.MESSAGE_TO_SIGN.replace(
       '%',
       lowerCasePublicKey
