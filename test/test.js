@@ -7,6 +7,7 @@ var assert = require('assert');
 const web3 = require('../services/web3')
 
 chai.use(require('chai-http'));
+chai.use(require('chai-as-promised'));
 
 // Start enzypt main
 app = require('../server.js')
@@ -60,22 +61,103 @@ describe('API endpoint /sell', function() {
         });
     });
   });
+
+  // POST - Incomplete post request
+  it('Sending a request without zip file hash should fail with a 400', function() {
+
+    var metaFileHash = '22'
+    var iv = '12212'
+    var ethPrice = '1.0'
+
+    return chai.request(app)
+      .post('/sell')
+      .send({
+        'metaFileHash': metaFileHash,
+        'iv': iv, 
+        'ethPrice': ethPrice
+      })
+      .then(async (res) => {
+        expect(res).to.have.status(400)
+    });
+  });
+
+  // POST - Incomplete post request
+  it('Sending a request without meta file hash should fail with a 400', function() {
+
+    var zipFileHash = '11'
+    var iv = '12212'
+    var ethPrice = '1.0'
+
+    return chai.request(app)
+      .post('/sell')
+      .send({
+        'zipFileHash': zipFileHash,
+        'iv': iv, 
+        'ethPrice': ethPrice
+      })
+      .then(async (res) => {
+        expect(res).to.have.status(400)
+    });
+  });
+
+  // POST - Incomplete post request
+  it('Sending a request without initialization vector should fail with a 400', function() {
+
+    var zipFileHash = '11'
+    var metaFileHash = '22'
+    var ethPrice = '1.0'
+
+    return chai.request(app)
+      .post('/sell')
+      .send({
+        'zipFileHash': zipFileHash,
+        'metaFileHash': metaFileHash,
+        'ethPrice': ethPrice
+      })
+      .then(async (res) => {
+        expect(res).to.have.status(400)
+    });
+  });
+
+  // POST - Incomplete post request
+  it('Sending a request without price should fail with a 400', function() {
+
+    var zipFileHash = '11'
+    var metaFileHash = '22'
+    var iv = '12212'
+
+    return chai.request(app)
+      .post('/sell')
+      .send({
+        'zipFileHash': zipFileHash,
+        'metaFileHash': metaFileHash,
+        'iv': iv
+      })
+      .then(async (res) => {
+        expect(res).to.have.status(400)
+    });
+  });
 });
 
 
 describe('API endpoint /buy', function() {
 
-  before(function() {
+  before(done => {
+    // drop the db
+    app.connectAndStart(process.env.MONGODB_TEST_URL, async () => {
+      dbConnection = await MongoClient.connect(process.env.MONGODB_TEST_URL)
+      dbConnection.dropDatabase(() => {
+        done()
+      })
+    })
+  })
 
-  });
-
-  after(function() {
-
+  after(function(done) {
+    app.server.close(done)
   });
 
   // GET - Show details of a file on sale
-  it('should return details of a file', function() {
-
+  it('Post and get details of a file for sale', function() {
     var zipFileHash = 'abcdef'
     var metaFileHash = 'fedcba'
     var iv = '101010101010101'
@@ -104,9 +186,8 @@ describe('API endpoint /buy', function() {
     });
   });
 
-
   // GET - Request nonexisting file
-  it('should return 404', function() {
+  it('Buy request with invalid url slug should return 404', function() {
 
     return chai.request(app)
       .get('/XwPp9xazJ0ku5CZnlmgAx2Dld8SHkAe') // Too short
@@ -116,7 +197,7 @@ describe('API endpoint /buy', function() {
   });
   
   // POST - Request for a random key
-  it('should return a random string', function() {
+  it('/rand should return a random string', function() {
     return chai.request(app)
       .post('/rand')
       .send({
@@ -130,9 +211,8 @@ describe('API endpoint /buy', function() {
       });
   });
 
-
   // POST - Request for a random key
-  it('should return a 400', function() {
+  it('/rand with invalid address should return a 400', function() {
     return chai.request(app)
       .post('/rand')
       .send({
@@ -143,26 +223,8 @@ describe('API endpoint /buy', function() {
       });
   });
 
-  /*
-  // POST - Posting a signed message to verify address ownership
-  it('should validate the signed message and public key', function() {
-    return chai.request(app)
-      .post('/msg')
-      .send({
-        publicKey: '0xbbb8c3f8997f9c0598bd9db897374879122e1d62',
-        signedMessage: 'signedMessage',
-        urlSlug: 'rrrandom'
-      })
-      .then(function(res) {
-        expect(res).to.have.status(200);
-        expect(res).to.be.html;
-        expect(res).to.have.property('text')
-        expect(res.text).to.have.length(32)
-      });
-  });
-  
-  // POST - Bad message
-  it('An unknown signed message should return 418', function() {
+  // Signing message for a non-existing file
+  it('A signed message for an unknown file should return 404', function() {
     return chai.request(app)
       .post('/msg')
       .send({
@@ -171,26 +233,11 @@ describe('API endpoint /buy', function() {
         signedMessage: 'somethinggood'
       })
       .then(function(res) {
-        console.log(res.body)
-        expect(res).to.have.status(418);
+        expect(res).to.have.status(404);
       });
   });
 
-  // POST - Bad transaction
-  it('A bad transaction should return 400', function() {
-    return chai.request(app)
-      .post('/buy')
-      .send({
-        txHash: '0xdeadbeef'
-      })
-      .then(function(res) {
-        expect(res).to.have.status(400);
-      });
-  });
-
-  */
-
-  // POST - Missing message
+  // Missing message
   it('A missing signed message should return 400', function() {
     return chai.request(app)
       .post('/msg')
@@ -203,7 +250,38 @@ describe('API endpoint /buy', function() {
       });
   });
 
-  // POST - Bad transaction
+  // Purchase without transaction hash
+  it('A buy transaction without hash should return 400', function() {
+    return chai.request(app)
+      .post('/buy')
+      .send()
+      .then(function(res) {
+        expect(res).to.have.status(400);
+      });
+  });
+
+  // A transaction with wrong transaction hash
+  it('A transaction with wrong transaction hash should return 418', function() {
+    return chai.request(app)
+      .post('/buy')
+      .send({
+        txHash: '0x77da5ded47b414646867f75d4c92d086fb329e02d32a78756db06fec17f70676'
+      })
+      .then(function(res) {
+        expect(res).to.have.status(418);
+      });
+  });
+
+  // A transaction with bad transaction hash
+  it('A transaction with bad transaction hash should throw with UnhandledPromiseRejectionWarning', function() {
+    expect(chai.request(app)
+      .post('/buy')
+      .send({
+        txHash: '0xdeadbeef'
+      })).to.throw
+  });
+
+  // POST - Wrong transaction hash
   it('A wrong transaction should return 418', function() {
     return chai.request(app)
       .post('/buy')
@@ -214,6 +292,5 @@ describe('API endpoint /buy', function() {
         expect(res).to.have.status(418);
       });
   });
-
 });
 
