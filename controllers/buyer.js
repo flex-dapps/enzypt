@@ -83,8 +83,8 @@ class BuyerController {
          .findOne({ fromAddress: recoveredKey.toLowerCase(), 
                     urlSlug: urlSlug,
                     paid: true })
-         
-       if (purchaseDoc && purchaseDoc.paid) {
+
+       if (purchaseDoc) {
          // Get IPFS hash
          const fileDoc = await req.db
            .collection('sales')
