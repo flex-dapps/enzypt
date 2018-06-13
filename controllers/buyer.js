@@ -56,42 +56,60 @@ class BuyerController {
   }
 
   static async postMsg(req, res, next) {
-    const { publicKey, signedMessage, urlSlug } = req.body
-    if (!publicKey || !signedMessage || !urlSlug) return res.status(400).send()
-    const lowerCasePublicKey = publicKey.toLowerCase()
-    const doc = await req.db
-      .collection('auth')
-      .findOne({ publicKey: lowerCasePublicKey })
+     const { publicKey, signedMessage, urlSlug } = req.body
+     if (!publicKey || !signedMessage || !urlSlug) return res.status(400).send()
+     const lowerCasePublicKey = publicKey.toLowerCase()
+     const doc = await req.db
+       .collection('auth')
+       .findOne({ publicKey: lowerCasePublicKey })
 
-    if(!doc) {
-      return res.status(404).send()
-    }
+     if (!doc) {
+       return res.status(404).send()
+     }
 
-    const messageToRecover = config.MESSAGE_TO_SIGN.replace(
-      '%',
-      lowerCasePublicKey
-    ).replace('%', doc.randomString)
-    const recoveredKey = await web3.eth.accounts.recover(
-      messageToRecover,
-      signedMessage,
-      false
-    )
-    if (recoveredKey.toLowerCase() === publicKey.toLowerCase()) {
-      const randomHex = web3.utils.randomHex(32).toUpperCase()
-      req.db.collection('purchases').insertOne(
-        {
-          fromAddress: recoveredKey.toLowerCase(),
-          purchaseRef: randomHex,
-          urlSlug: urlSlug
-        },
-        () => {
-          res.send(randomHex)
-        }
-      )
-    } else {
-      res.status(418).send()
-    }
-  }
+     const messageToRecover = config.MESSAGE_TO_SIGN.replace(
+       '%',
+       lowerCasePublicKey
+     ).replace('%', doc.randomString)
+     const recoveredKey = await web3.eth.accounts.recover(
+       messageToRecover,
+       signedMessage,
+       false
+     )
+     if (recoveredKey.toLowerCase() === publicKey.toLowerCase()) {
+       // Check if previous purchase is registered.
+       const purchaseDoc = await req.db
+         .collection('purchases')
+         .findOne({ fromAddress: publicKey, urlSlug: urlSlug })
+         
+       if (purchaseDoc && purchaseDoc.paid) {
+         // Get IPFS hash
+         const fileDoc = await req.db
+           .collection('sales')
+           .findOne({ urlSlug: urlSlug })
+
+         if (!fileDoc) {
+           return res.status(500).send()
+         }
+
+         res.send({ zipFileHash: fileDoc.zipFileHash, randomHex: null })
+       } else {
+         const randomHex = web3.utils.randomHex(32).toUpperCase()
+         req.db.collection('purchases').insertOne(
+           {
+             fromAddress: recoveredKey.toLowerCase(),
+             purchaseRef: randomHex,
+             urlSlug: urlSlug
+           },
+           () => {
+             res.send({ zipFileHash: null, randomHex: randomHex })
+           }
+         )
+       }
+     } else {
+       res.status(418).send()
+     }
+   }
 
   static async postBuy(req, res, next) {
     const { txHash } = req.body
@@ -106,11 +124,12 @@ class BuyerController {
       .collection('purchases')
       .findOne({ fromAddress: fromAddress, purchaseRef: inputData })
 
+    if (!purchaseDoc) return res.status(418).send()
+    
     const fileDoc = await req.db
       .collection('sales')
       .findOne({ urlSlug: purchaseDoc.urlSlug })
 
-    if (!purchaseDoc) return res.status(418).send()
     if (!fileDoc) return res.status(418).send()
 
     if (ethSent < Number(fileDoc.ethPrice)) return res.status(418).send()

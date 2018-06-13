@@ -49,11 +49,9 @@ describe('API endpoint /sell', function() {
       })
       .then(async (res) => {
         expect(res).to.have.status(201)
-        expect(res).to.be.json
-        expect(res.body).to.have.property('slug')
-
+        expect(res).to.have.property('text')
         // Look up slug in db and compare
-        var dbEntry = dbConnection.collection("sales").findOne({ 'urlSlug': res.body.slug }, function(err, result) {
+        var dbEntry = dbConnection.collection("sales").findOne({ 'urlSlug': res.text }, function(err, result) {
           expect(result.zipFileHash).to.equal(zipFileHash)
           expect(result.metaFileHash).to.equal(metaFileHash)
           expect(result.iv).to.equal(iv)
@@ -175,7 +173,7 @@ describe('API endpoint /buy', function() {
       .then(async (res) => {
         // Request file and compare
         return chai.request(app)
-          .get('/' + res.body.slug)
+          .get('/' + res.text)
           .then(function(res) {
             expect(res).to.have.status(200);
             expect(res).to.be.json;
