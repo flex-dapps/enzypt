@@ -80,7 +80,7 @@ class BuyerController {
        // Check if previous purchase is registered.
        const purchaseDoc = await req.db
          .collection('purchases')
-         .findOne({ fromAddress: publicKey, urlSlug: urlSlug })
+         .findOne({ fromAddress: recoveredKey.toLowerCase(), urlSlug: urlSlug })
          
        if (purchaseDoc && purchaseDoc.paid) {
          // Get IPFS hash
