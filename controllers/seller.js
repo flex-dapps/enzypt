@@ -16,7 +16,7 @@ class SellerController {
         metaFileHash,
         iv,
         ethPrice,
-        ethAddress.toLowerCase(),
+        ethAddress: ethAddress.toLowerCase(),
         downloads: 0,
         urlSlug
       },
