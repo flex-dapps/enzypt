@@ -7,8 +7,8 @@ class SellerController {
   }
 
   static postSell(req, res, next) {
-    const { zipFileHash, metaFileHash, iv, ethPrice } = req.body
-    if (!zipFileHash || !metaFileHash || !iv || !ethPrice) return res.status(400).end()
+    const { zipFileHash, metaFileHash, iv, ethPrice, ethAddress } = req.body
+    if (!zipFileHash || !metaFileHash || !iv || !ethPrice || !ethAddress) return res.status(400).end()
     const urlSlug = randomstring.generate()
     req.db.collection('sales').insertOne(
       {
@@ -16,6 +16,7 @@ class SellerController {
         metaFileHash,
         iv,
         ethPrice,
+        ethAddress.toLowerCase(),
         downloads: 0,
         urlSlug
       },

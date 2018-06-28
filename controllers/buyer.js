@@ -116,6 +116,7 @@ class BuyerController {
     if (!txHash) return res.status(400).send()
     const tx = await web3.eth.getTransaction(txHash)
     if (!tx || !tx.input || !tx.from || !tx.value) return res.status(418).send()
+    const toAddress = tx.to.toLowerCase()
     const fromAddress = tx.from.toLowerCase()
     const inputData = tx.input.toUpperCase()
     const ethSent = web3.utils.fromWei(tx.value, 'ether')
@@ -132,7 +133,10 @@ class BuyerController {
 
     if (!fileDoc) return res.status(418).send()
 
-    if (ethSent < Number(fileDoc.ethPrice)) return res.status(418).send()
+    if (
+      ethSent < Number(fileDoc.ethPrice) ||
+      (purchaseDoc.ethAddress && toAddress !== purchaseDoc.ethAddress)
+    ) return res.status(418).send()
 
     if (!purchaseDoc.paid) {
       await req.db
