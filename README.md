@@ -6,6 +6,7 @@
 - [How does it work?](#how-does-it-work)
 - [API Specification](#api-specification)
 - [Development](#development)
+- [Configuration](#configuration)
 
 ## Overview
 This is the repository for the [enzypt.io](https://enzypt.io) backend which is hosted at api.enzypt.io. The "official" gateway is hosted by [Flex Dapps](https://flexdapps.com), however this code can be used to host your own payment verification gateway.
@@ -128,3 +129,6 @@ Returns
 String // IPFS hash of the purchased zip file
 ```
 
+## Configuration
+
+The backend relies on INFURA as the web3 provider to verify purchases (transactions). To enable INFURA, you have to add your project ID to `config/index.js`. Alternatively, you can provide your own provider URL there.
