@@ -129,6 +129,29 @@ Returns
 String // IPFS hash of the purchased zip file
 ```
 
+## Development
+
+To set up Enzypt locally, you will need a `MongoDB` instance that you can connect to. Clone this repo, then run:
+
+```
+yarn
+```
+
+You'll then need to create a file called `.env`, inside which you should put the following:
+
+```
+MONGODB_URL=mongodb://localhost/enzypt
+MONGODB_TEST_URL=mongodb://localhost/enzypttest # <-- Used for running tests
+NETWORK=rinkeby # <-- Can be any key that you add in the `config/index.js` file under ETH_NODE_RPC_URL
+PORT=3001 # <-- The port you would like the API to run on
+```
+
+Then you can start the backend with:
+
+```
+yarn start
+```
+
 ## Configuration
 
 The backend relies on INFURA as the web3 provider to verify purchases (transactions). To enable INFURA, you have to add your project ID to `config/index.js`. Alternatively, you can provide your own provider URL there.

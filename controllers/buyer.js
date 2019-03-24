@@ -1,6 +1,5 @@
 const jsonParser = require('body-parser').json()
 const randomstring = require('randomstring')
-const Etherscan = require('../services/etherscan')
 const config = require('../config')
 const web3 = require('../services/web3')
 
@@ -80,7 +79,7 @@ class BuyerController {
        // Check if previous purchase is registered.
        const purchaseDoc = await req.db
          .collection('purchases')
-         .findOne({ fromAddress: recoveredKey.toLowerCase(), 
+         .findOne({ fromAddress: recoveredKey.toLowerCase(),
                     urlSlug: urlSlug,
                     paid: true })
 
@@ -128,7 +127,7 @@ class BuyerController {
       .findOne({ fromAddress: fromAddress, purchaseRef: inputData })
 
     if (!purchaseDoc) return res.status(418).send()
-    
+
     const fileDoc = await req.db
       .collection('sales')
       .findOne({ urlSlug: purchaseDoc.urlSlug })

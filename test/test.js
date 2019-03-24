@@ -3,8 +3,6 @@
 const MongoClient = require('mongodb').MongoClient
 const chai = require('chai');
 const expect = require('chai').expect;
-var assert = require('assert');
-const web3 = require('../services/web3')
 
 chai.use(require('chai-http'));
 chai.use(require('chai-as-promised'));
@@ -44,7 +42,7 @@ describe('API endpoint /sell', function() {
       .send({
         'zipFileHash': zipFileHash,
         'metaFileHash': metaFileHash,
-        'iv': iv, 
+        'iv': iv,
         'ethPrice': ethPrice
       })
       .then(async (res) => {
@@ -71,7 +69,7 @@ describe('API endpoint /sell', function() {
       .post('/sell')
       .send({
         'metaFileHash': metaFileHash,
-        'iv': iv, 
+        'iv': iv,
         'ethPrice': ethPrice
       })
       .then(async (res) => {
@@ -90,7 +88,7 @@ describe('API endpoint /sell', function() {
       .post('/sell')
       .send({
         'zipFileHash': zipFileHash,
-        'iv': iv, 
+        'iv': iv,
         'ethPrice': ethPrice
       })
       .then(async (res) => {
@@ -167,7 +165,7 @@ describe('API endpoint /buy', function() {
       .send({
         'zipFileHash': zipFileHash,
         'metaFileHash': metaFileHash,
-        'iv': iv, 
+        'iv': iv,
         'ethPrice': ethPrice
       })
       .then(async (res) => {
@@ -193,7 +191,7 @@ describe('API endpoint /buy', function() {
         expect(res).to.have.status(404);
       });
   });
-  
+
   // POST - Request for a random key
   it('/rand should return a random string', function() {
     return chai.request(app)
