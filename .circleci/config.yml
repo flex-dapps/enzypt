@@ -38,6 +38,10 @@ jobs:
 #      - run: yarn test
 
   test:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:8.11
+      - image: circleci/mongo:3.4
     steps:
       - run:
         name: Test
