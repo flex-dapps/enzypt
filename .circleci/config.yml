@@ -37,6 +37,12 @@ jobs:
       # run tests!
 #      - run: yarn test
 
+  test:
+    steps:
+      - run:
+        name: Test
+        command: npm run test
+
   deploy-prod:
     docker:
       - image: circleci/node:8.11
@@ -49,6 +55,9 @@ workflows:
   build-and-deploy:
     jobs:
       - build
+      - test:
+          requires:
+            - build
       - deploy-prod:
           filters:
             branches:
