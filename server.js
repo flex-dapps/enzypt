@@ -14,8 +14,8 @@ app.connectAndStart = (DB_URL, _callback = () => {}) => {
 
 	routes.bind(app)
 
-	app.server = app.listen(3000, () => {
-	  console.log('Listening on 3000')
+	app.server = app.listen(process.env.PORT, () => {
+	  console.log(`Listening on ${process.env.PORT}`)
 	  _callback()
 	})
 }

@@ -3,8 +3,6 @@
 const MongoClient = require('mongodb').MongoClient
 const chai = require('chai');
 const expect = require('chai').expect;
-var assert = require('assert');
-const web3 = require('../services/web3')
 
 chai.use(require('chai-http'));
 chai.use(require('chai-as-promised'));
@@ -38,14 +36,16 @@ describe('API endpoint /sell', function() {
     var metaFileHash = '22'
     var iv = '12212'
     var ethPrice = '1.0'
+    var ethAddress = '0x4e8775a3AeECE5B8a5B59ca3285f50D796470E7d'
 
     return chai.request(app)
       .post('/sell')
       .send({
         'zipFileHash': zipFileHash,
         'metaFileHash': metaFileHash,
-        'iv': iv, 
-        'ethPrice': ethPrice
+        'iv': iv,
+        'ethPrice': ethPrice,
+        'ethAddress': ethAddress
       })
       .then(async (res) => {
         expect(res).to.have.status(201)
@@ -71,7 +71,7 @@ describe('API endpoint /sell', function() {
       .post('/sell')
       .send({
         'metaFileHash': metaFileHash,
-        'iv': iv, 
+        'iv': iv,
         'ethPrice': ethPrice
       })
       .then(async (res) => {
@@ -90,7 +90,7 @@ describe('API endpoint /sell', function() {
       .post('/sell')
       .send({
         'zipFileHash': zipFileHash,
-        'iv': iv, 
+        'iv': iv,
         'ethPrice': ethPrice
       })
       .then(async (res) => {
@@ -160,6 +160,7 @@ describe('API endpoint /buy', function() {
     var metaFileHash = 'fedcba'
     var iv = '101010101010101'
     var ethPrice = '0.1'
+    var ethAddress = '0x4e8775a3AeECE5B8a5B59ca3285f50D796470E7d'
 
     // Post a file to retrieve later
     chai.request(app)
@@ -167,8 +168,9 @@ describe('API endpoint /buy', function() {
       .send({
         'zipFileHash': zipFileHash,
         'metaFileHash': metaFileHash,
-        'iv': iv, 
-        'ethPrice': ethPrice
+        'iv': iv,
+        'ethPrice': ethPrice,
+        'ethAddress': ethAddress
       })
       .then(async (res) => {
         // Request file and compare
@@ -193,7 +195,7 @@ describe('API endpoint /buy', function() {
         expect(res).to.have.status(404);
       });
   });
-  
+
   // POST - Request for a random key
   it('/rand should return a random string', function() {
     return chai.request(app)
