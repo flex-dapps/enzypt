@@ -127,7 +127,6 @@ class BuyerController {
       .findOne({ fromAddress: fromAddress, purchaseRef: inputData })
 
     if (!purchaseDoc) return res.status(418).send()
-
     const fileDoc = await req.db
       .collection('sales')
       .findOne({ urlSlug: purchaseDoc.urlSlug })
